@@ -13,7 +13,7 @@ interferes with the [DictReader][dict]'s column detection
 ### Redis Schema 
 
 * Loan hash
-	* Loan::<id>
+	* Loan::%id
 	* Contains all the data about the loan
 
 * User list
@@ -21,7 +21,7 @@ interferes with the [DictReader][dict]'s column detection
 	* Contains a list of all the users' screen names.
 
 * User loans set
-	* User::<Screen Name>::Loans
+	* User::%Screen Name::Loans
 	* Contains IDs of loan hashes that belong to user
 
 
