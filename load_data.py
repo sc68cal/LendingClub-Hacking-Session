@@ -2,17 +2,21 @@ import csv
 import redis
 import sys
 
-client = redis.Redis()
+client = redis.Redis(host=sys.argv[2])
 
 
-def process_row(row):
-    # Populate the Loan hash
-    client.hmset("Loan::%s" % row['Loan ID'], row)
+def process_row(pipe, row):
+    if row:
+        # Populate the Loan hash
+        pipe.hmset("Loan::%s" % row['Loan ID'], row)
 
-    # Add to the list of all user IDs
-    client.sadd("Users::", row['Screen Name'])
+        # Add to the list of all user IDs
+        pipe.sadd("Users::", row['Screen Name'])
 
-    client.lpush("User::%s::Loans" % row['Screen Name'], row['Loan ID'])
+        pipe.lpush("User::%s::Loans" % row['Screen Name'], row['Loan ID'])
+        pipe.execute()
 
 if __name__ == "__main__":
-    map(process_row, csv.DictReader(open(sys.argv[1])))
+    with client.pipeline(transaction=False) as pipe:
+        for row in csv.DictReader(open(sys.argv[1])):
+            process_row(pipe, row)
